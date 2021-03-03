@@ -4,7 +4,6 @@ const keyCache = require('./key-cache')
 const jwksClient = require('jwks-rsa')
 const got = require('got')
 const jwt = require('jsonwebtoken')
-const {promisify} = require('util')
 
 
 const defaultConfig = {
@@ -23,19 +22,20 @@ module.exports=TokenValidator
 
 TokenValidator.prototype.isValid = async function(token) {
     const that = this
+    // if it is buffer make it string for jwt library
+    token = token.toString();
     const parsedToken = jwt.decode(token, {complete: true});
     const issuer = parsedToken.payload[that.config.issuerClaim]
 
-    // console.debug(parsedToken);
     const wellKnowEndpoint =  issuer + that.config.wellKnowEndpoint
-    console.debug(wellKnowEndpoint)
+    // console.log(wellKnowEndpoint)
 
     const signKey = await that.keyCache.get(issuer, that.getSigningKey, {
         wellKnowEndpoint: wellKnowEndpoint,
         kid: parsedToken.header.kid
     })
     
-    return promisify(jwt.verify)(token, signKey);
+    return jwt.verify(token, signKey);
 }
 
 TokenValidator.prototype.getSigningKey = async function(options) {

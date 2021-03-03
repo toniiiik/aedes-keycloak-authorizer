@@ -56,17 +56,19 @@ Authorizer.prototype.authenticate = function () {
   return function (client, user, pass, cb) {
     const missingToken = !pass;
 
+    // console.log('Validationg with token: ' + pass)
+
     if (missingToken) {
       cb(null, false);
       return;
     }
     // set user claims as user
     // TBD in the future use only required claims
-    client.user = {};
+    // client.user = {};
 
     that.tokenValidator.isValid(pass).then(
       (claims) => {
-        client.claims = claims;
+        // client.claims = claims;
         cb(null, true)
       },
       (err) => cb(err)
@@ -93,7 +95,7 @@ Authorizer.prototype.authorizePublish = function () {
  */
 Authorizer.prototype.authorizeSubscribe = function () {
   const that = this;
-  return function (client, subscription, callback) {
+  return function (client, subscription, cb) {
     cb(null, subscription);
   };
 };
