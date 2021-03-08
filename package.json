@@ -1,6 +1,6 @@
 {
   "name": "aedes-keycloak-authorizer",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Authorization plugin for aedes MQTT Broker",
   "main": "index.js",
   "scripts": {},
@@ -11,7 +11,8 @@
   "keywords": [
     "aedes",
     "mqtt",
-    "authorization"
+    "authorization",
+    "keycloak"
   ],
   "author": "bjyurkovich",
   "license": "MIT",

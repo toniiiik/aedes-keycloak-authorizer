@@ -81,7 +81,7 @@ Authorizer.prototype.authenticate = function () {
 
     that.tokenValidator.isValid(pass).then(
       (claims) => {
-        // client.claims = claims;
+        client.claims = claims;
         cb(null, true)
       },
       (err) => {
@@ -104,7 +104,7 @@ Authorizer.prototype.authenticate = function () {
 Authorizer.prototype.authorizePublish = function () {
   const that = this;
   return function (client, packet, cb) {
-    if (that.fallback) {
+    if (!client.claims && that.fallback) {
       console.log("Trying with fallback authorizer")
       that.fallback.authorizePublish()(client, packet, cb)
       return
@@ -121,7 +121,7 @@ Authorizer.prototype.authorizePublish = function () {
 Authorizer.prototype.authorizeSubscribe = function () {
   const that = this;
   return function (client, subscription, cb) {
-    if (that.fallback) {
+    if (!client.claims && that.fallback) {
       console.log("Trying with fallback authorizer")
       that.fallback.authorizeSubscribe()(client, subscription, cb)
       return

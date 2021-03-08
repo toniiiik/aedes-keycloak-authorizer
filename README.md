@@ -80,6 +80,7 @@ Prints options which can be passed to constructor
 ## Planned features
 
  - [ ] missing ip white list in conjuction with fallback authorizer
+ - [ ] Whitelist of issuers
 
 ## Testing
 
