@@ -19,7 +19,9 @@
     "url": "https://github.com/toniiiik/aedes-keycloak-authorizer.git/issues"
   },
   "homepage": "https://github.com/toniiiik/aedes-keycloak-authorizer.git#readme",
-  "devDependencies": {},
+  "devDependencies": {
+    "minimatch": "^3.0.4"
+  },
   "dependencies": {
     "got": "^11.8.2",
     "jsonwebtoken": "8.5.1",

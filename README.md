@@ -73,7 +73,13 @@ Prints options which can be passed to constructor
                         default: '/.well-known/openid-configuration',
     issuerClaim:        claim of issuer. The value is used to concat with well known endpoint
                         default: 'iss'
+    fallback:           object which define fallback authorizer. Can be used if external connections are validated with jwt and internal service connection are walidated with service account (e.g. lenses.io mqtt connector).
+                        default: null
 ```
+
+## Planned features
+
+ - [ ] missing ip white list in conjuction with fallback authorizer
 
 ## Testing
 

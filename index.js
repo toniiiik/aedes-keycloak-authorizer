@@ -25,6 +25,7 @@ Object.entries =
  */
 function Authorizer(config) {
   this.tokenValidator = new tokenValidator(config);
+  this.config = config
 }
 module.exports = Authorizer;
 
@@ -44,6 +45,17 @@ Authorizer.prototype.save = async function () {
  */
 Authorizer.prototype.init = async function (force) {
   const that = this;
+  if (that.config.fallback) {
+    try {
+      const fallback = require(that.config.fallback.type)
+      that.fallback = new fallback(that.config.fallback);
+      await that.fallback.init()
+    } catch (error) {
+      console.error('Could not create fallback authorizer!')
+      console.error(error)
+    }
+    
+  }
 };
 
 /**
@@ -55,10 +67,11 @@ Authorizer.prototype.authenticate = function () {
   const that = this;
   return function (client, user, pass, cb) {
     const missingToken = !pass;
+    const username = user || "";
 
     // console.log('Validationg with token: ' + pass)
 
-    if (missingToken) {
+    if (missingToken && (user == 'jwt' || user == "")) {
       cb(null, false);
       return;
     }
@@ -71,7 +84,14 @@ Authorizer.prototype.authenticate = function () {
         // client.claims = claims;
         cb(null, true)
       },
-      (err) => cb(err)
+      (err) => {
+        if (that.fallback) {
+          console.log("Trying with fallback authorizer: " + username)
+          that.fallback.authenticate()(client, user, pass, cb)
+          return
+        }
+        cb(err)
+      }
     );
   };
 };
@@ -84,6 +104,11 @@ Authorizer.prototype.authenticate = function () {
 Authorizer.prototype.authorizePublish = function () {
   const that = this;
   return function (client, packet, cb) {
+    if (that.fallback) {
+      console.log("Trying with fallback authorizer")
+      that.fallback.authorizePublish()(client, packet, cb)
+      return
+    }
     cb(null);
   };
 };
@@ -96,6 +121,11 @@ Authorizer.prototype.authorizePublish = function () {
 Authorizer.prototype.authorizeSubscribe = function () {
   const that = this;
   return function (client, subscription, cb) {
+    if (that.fallback) {
+      console.log("Trying with fallback authorizer")
+      that.fallback.authorizeSubscribe()(client, subscription, cb)
+      return
+    }
     cb(null, subscription);
   };
 };
@@ -157,6 +187,8 @@ Authorizer.printOptions = function () {
                         default: '/.well-known/openid-configuration',
     issuerClaim:        claim of issuer. The value is used to concat with well known endpoint
                         default: 'iss'
+    fallback:           object which define fallback authorizer. Can be used if external connections are validated with jwt and internal service connection are walidated with service account (e.g. lenses.io mqtt connector).
+                        default: null
   `
   console.log(options)
 };
