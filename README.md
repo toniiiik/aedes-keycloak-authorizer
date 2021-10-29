@@ -68,13 +68,18 @@ Prints options which can be passed to constructor
 
   Keycloak aedes Authorizer.
 
+  Keycloak aedes Authorizer.
   available options are:
     wellKnowEndpoint:   well know discovery oidc endpoint
                         default: '/.well-known/openid-configuration',
     issuerClaim:        claim of issuer. The value is used to concat with well known endpoint
                         default: 'iss'
-    fallback:           object which define fallback authorizer. Can be used if external connections are validated with jwt and internal service connection are walidated with service account (e.g. lenses.io mqtt connector).
+    clientId:           clientId used for password grand authorization
+                        default: tlmd-ui
+    authUrl:            token endpoint
                         default: null
+    realm:              realm used for authorization. If user is specified with realm prefix (realm\usernmae) this will be overriden.
+                        default: master
 ```
 
 ## Planned features
@@ -90,7 +95,7 @@ TBD
 
 ```
 npm install -D
-npm test
+npm test:ci
 ```
 
 

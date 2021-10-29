@@ -1,6 +1,8 @@
 "use strict";
 
-const tokenValidator = require("./utils/token-validation");
+const keycloakValidator = require("./utils/keycloak-validation");
+const loggerInit = require("./utils/logger");
+const logger = loggerInit({name: "Authorizer", pretty: true})
 
 const mapToObj = (m) => {
   return Array.from(m).reduce((obj, [key, value]) => {
@@ -24,7 +26,7 @@ Object.entries =
  * @api public
  */
 function Authorizer(config) {
-  this.tokenValidator = new tokenValidator(config);
+  this.keycloakValidator = new keycloakValidator(config);
   this.config = config
 }
 module.exports = Authorizer;
@@ -44,18 +46,8 @@ Authorizer.prototype.save = async function () {
  * @api public
  */
 Authorizer.prototype.init = async function (force) {
-  const that = this;
-  if (that.config.fallback) {
-    try {
-      const fallback = require(that.config.fallback.type)
-      that.fallback = new fallback(that.config.fallback);
-      await that.fallback.init()
-    } catch (error) {
-      console.error('Could not create fallback authorizer!')
-      console.error(error)
-    }
-    
-  }
+  const that = this;  
+  logger.debug(`Keycloak authorizer initialized`)
 };
 
 /**
@@ -66,31 +58,16 @@ Authorizer.prototype.init = async function (force) {
 Authorizer.prototype.authenticate = function () {
   const that = this;
   return function (client, user, pass, cb) {
-    const missingToken = !pass;
-    const username = user || "";
-
-    // console.log('Validationg with token: ' + pass)
-
-    if (missingToken && (user == 'jwt' || user == "")) {
-      cb(null, false);
-      return;
-    }
     // set user claims as user
     // TBD in the future use only required claims
     // client.user = {};
-
-    that.tokenValidator.isValid(pass).then(
+    that.keycloakValidator.isValid(user, pass).then(
       (claims) => {
         client.claims = claims;
         cb(null, true)
       },
       (err) => {
-        if (that.fallback) {
-          console.log("Trying with fallback authorizer: " + username)
-          that.fallback.authenticate()(client, user, pass, cb)
-          return
-        }
-        cb(err)
+        cb(err, false)
       }
     );
   };
@@ -187,7 +164,11 @@ Authorizer.printOptions = function () {
                         default: '/.well-known/openid-configuration',
     issuerClaim:        claim of issuer. The value is used to concat with well known endpoint
                         default: 'iss'
-    fallback:           object which define fallback authorizer. Can be used if external connections are validated with jwt and internal service connection are walidated with service account (e.g. lenses.io mqtt connector).
+    clientId:           clientId used for broker authentication 
+                        default: tlmd-ui
+    authUrl:            token endpoint
+                        default: null
+    realm:              realm used for authorization. If user is specified with realm prefix (realm'\\usernmae) this will be overriden.
                         default: null
   `
   console.log(options)

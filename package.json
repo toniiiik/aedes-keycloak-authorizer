@@ -1,9 +1,13 @@
 {
   "name": "aedes-keycloak-authorizer",
-  "version": "1.0.2",
+  "version": "2.0.0",
   "description": "Authorization plugin for aedes MQTT Broker",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "test": "npm run lint:standard && npm run test:ci",
+    "lint:standard": "echo 'lint'",
+    "test:ci": "tap test/credentials.test.js --no-check-coverage"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/toniiiik/aedes-keycloak-authorizer.git"
@@ -21,12 +25,16 @@
   },
   "homepage": "https://github.com/toniiiik/aedes-keycloak-authorizer.git#readme",
   "devDependencies": {
-    "minimatch": "^3.0.4"
+    "minimatch": "^3.0.4",
+    "tap": "^15.0.10"
   },
   "dependencies": {
+    "axios": "^0.24.0",
     "got": "^11.8.2",
     "jsonwebtoken": "8.5.1",
     "jwks-rsa": "1.12.3",
-    "node-cache": "^5.1.2"
+    "node-cache": "^5.1.2",
+    "pino": "^6.13.2",
+    "pino-pretty": "^4.8.0"
   }
 }
